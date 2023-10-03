@@ -7,4 +7,3 @@ console.log(args);
 //     'hi'
 //   ]
 console.log(args[2])
-
