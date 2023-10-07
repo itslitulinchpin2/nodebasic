@@ -2,8 +2,10 @@ var http = require('http'); //https, fs, url은 모듈임.
 var fs = require('fs');
 var url = require('url')
 var qs = require('querystring'); // post전송 데이터 수신시 사용
+var path = require('path');
+var sanitizeHtml = require('sanitize-html');
 
-var template = require('./lib/template.js');
+var template = require('./lib/template.js'); // export한 모듈 사용하기
 
 
 
@@ -44,7 +46,8 @@ var app = http.createServer(function(request,response){
         //쿼리스트링이 존재한다면
 
         fs.readdir('./data',function(error, filelist){
-          fs.readFile(`./data/${queryData.id}`,'utf8', function(err,description){
+          var filteredId = path.parse(queryData.id).base;
+          fs.readFile(`./data/${filteredId}`,'utf8', function(err,description){
             var title = queryData.id;
             var list=template.list(filelist)
             var html=template.html(title,list,`<h2>${title}</h2>${description}`,
@@ -113,7 +116,8 @@ var app = http.createServer(function(request,response){
   }
   else if (pathname==='/update'){
     fs.readdir('./data',function(error, filelist){
-      fs.readFile(`./data/${queryData.id}`,'utf8', function(err,description){
+      var filteredId = path.parse(queryData.id).base;
+      fs.readFile(`./data/${filteredId}}`,'utf8', function(err,description){
         var title = queryData.id;
         var list=template.list(filelist)
         var html=template.html(title,list,`
@@ -165,8 +169,8 @@ var app = http.createServer(function(request,response){
     request.on('end',function(){
       var post = qs.parse(body); 
       var id = post.id;
-
-      fs.unlink(`data/${id}`, function(error){
+      var filteredId = path.parse(queryData.id).base;
+      fs.unlink(`data/${filteredId}`, function(error){
           response.writeHead(302, {Location: `/`});
           response.end();
       })
